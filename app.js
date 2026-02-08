@@ -7,7 +7,7 @@ const sequelize = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 
-const initSocket = require("./sockets/socket"); // 👈 new socket initializer
+const initSocket = require("./socket-io"); // 👈 new socket initializer
 const http = require("http");
 
 const app = express();
