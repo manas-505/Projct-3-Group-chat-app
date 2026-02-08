@@ -27,16 +27,22 @@ function addMessage(text, type = "sent") {
 }
 
 /* Handle send */
-chatForm.addEventListener("submit", (e) => {
+chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const text = messageInput.value.trim();
   if (!text) return;
 
-  addMessage(text, "sent"); // UI only (real-time later)
+  try {
+    await api.post("/chat/send", { text });
 
-  messageInput.value = "";
+    addMessage(text, "sent"); // show instantly
+    messageInput.value = "";
+  } catch (err) {
+    console.error("Send error", err);
+  }
 });
+
 
 /* Initial scroll */
 scrollToBottom();
@@ -46,3 +52,28 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   localStorage.removeItem("token");
   window.location.href = "/login";
 });
+
+async function loadMessages() {
+  try {
+    const res = await api.get("/chat/messages");
+
+    chatMessages.innerHTML = "";
+
+    res.data.forEach((msg) => {
+      const type = msg.UserId === getUserIdFromToken() ? "sent" : "received";
+      addMessage(msg.text, type);
+    });
+  } catch (err) {
+    console.error("Load messages error", err);
+  }
+}
+
+function getUserIdFromToken() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  const payload = JSON.parse(atob(token.split(".")[1]));
+  return payload.id;
+}
+
+loadMessages();
