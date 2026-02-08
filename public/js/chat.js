@@ -2,6 +2,9 @@ const chatMessages = document.getElementById("chatMessages");
 const chatForm = document.getElementById("chatForm");
 const messageInput = document.getElementById("messageInput");
 
+/* 🔥 connect socket */
+const socket = io("http://localhost:3000");
+
 /* Auto scroll to bottom */
 function scrollToBottom() {
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -36,16 +39,18 @@ chatForm.addEventListener("submit", async (e) => {
   try {
     await api.post("/chat/send", { text });
 
-    addMessage(text, "sent"); // show instantly
+    // ❌ DO NOT addMessage here (socket will handle it)
     messageInput.value = "";
   } catch (err) {
     console.error("Send error", err);
   }
 });
 
-
-/* Initial scroll */
-scrollToBottom();
+/* 🔥 Listen for live messages from server */
+socket.on("newMessage", (msg) => {
+  const type = msg.UserId === getUserIdFromToken() ? "sent" : "received";
+  addMessage(msg.text, type);
+});
 
 /* Logout */
 document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -53,6 +58,7 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   window.location.href = "/login";
 });
 
+/* Load old messages from DB */
 async function loadMessages() {
   try {
     const res = await api.get("/chat/messages");
@@ -68,6 +74,7 @@ async function loadMessages() {
   }
 }
 
+/* Decode user ID from JWT */
 function getUserIdFromToken() {
   const token = localStorage.getItem("token");
   if (!token) return null;
@@ -76,4 +83,5 @@ function getUserIdFromToken() {
   return payload.id;
 }
 
+/* Initial load */
 loadMessages();

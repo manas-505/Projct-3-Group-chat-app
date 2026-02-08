@@ -36,7 +36,31 @@ app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "dashboard.html"));
 });
 
-// start server
-sequelize.sync().then(() => {
-  app.listen(3000, () => console.log("Server running on port 3000"));
+const http = require("http");
+const { Server } = require("socket.io");
+
+/* create http server from express */
+const server = http.createServer(app);
+
+/* socket.io setup */
+const io = new Server(server, {
+  cors: { origin: "*" },
 });
+
+/* make io accessible in controllers */
+app.set("io", io);
+
+/* socket connection */
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+/* start server after DB sync */
+sequelize.sync().then(() => {
+  server.listen(3000, () => console.log("Server running on port 3000"));
+});
+
