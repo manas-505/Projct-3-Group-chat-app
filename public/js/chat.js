@@ -3,7 +3,12 @@ const chatForm = document.getElementById("chatForm");
 const messageInput = document.getElementById("messageInput");
 
 /* 🔥 connect socket */
-const socket = io("http://localhost:3000");
+const socket = io("http://localhost:3000", {
+  auth: {
+    token: localStorage.getItem("token"),
+  },
+});
+
 
 /* Auto scroll to bottom */
 function scrollToBottom() {
@@ -50,6 +55,17 @@ chatForm.addEventListener("submit", async (e) => {
 socket.on("newMessage", (msg) => {
   const type = msg.UserId === getUserIdFromToken() ? "sent" : "received";
   addMessage(msg.text, type);
+});
+
+/* 🔐 Receive authenticated user info from server */
+socket.on("userConnected", (user) => {
+  console.log("Connected user:", user);
+
+  // Show user ID in chat header (optional UI update)
+  const header = document.querySelector(".chat-header h5");
+  if (header) {
+    header.innerText = `My Group Chat (User ${user.name})`;
+  }
 });
 
 /* Logout */

@@ -5,25 +5,26 @@ require("dotenv").config();
 
 const sequelize = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
-
-const app = express();
 const chatRoutes = require("./routes/chatRoutes");
 
-app.use(express.json());
+const initSocket = require("./sockets/socket"); // 👈 new socket initializer
+const http = require("http");
 
-app.use("/api/chat", chatRoutes);
+const app = express();
 
+/* ===== Middleware ===== */
 app.use(cors());
-
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// static files (css, js)
+/* ===== Static Files ===== */
 app.use(express.static("public"));
 
-// API routes
+/* ===== API Routes ===== */
 app.use("/api/auth", authRoutes);
+app.use("/api/chat", chatRoutes);
 
-// ✅ PAGE ROUTES (IMPORTANT)
+/* ===== Page Routes ===== */
 app.get("/signup", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "signup.html"));
 });
@@ -36,31 +37,13 @@ app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "dashboard.html"));
 });
 
-const http = require("http");
-const { Server } = require("socket.io");
-
-/* create http server from express */
+/* ===== Create HTTP Server ===== */
 const server = http.createServer(app);
 
-/* socket.io setup */
-const io = new Server(server, {
-  cors: { origin: "*" },
-});
+/* ===== Initialize Socket.IO from separate file ===== */
+initSocket(server, app);
 
-/* make io accessible in controllers */
-app.set("io", io);
-
-/* socket connection */
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-});
-
-/* start server after DB sync */
+/* ===== Start Server After DB Sync ===== */
 sequelize.sync().then(() => {
   server.listen(3000, () => console.log("Server running on port 3000"));
 });
-
