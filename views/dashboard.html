@@ -6,48 +6,47 @@
   <link rel="stylesheet" href="/css/chat.css">
 </head>
 
-<body>
+<body class="bg-light">
 
-<div class="chat-container">
+<div class="container-fluid vh-100">
+  <div class="row h-100">
 
-  <!-- Header -->
-  <div class="chat-header d-flex justify-content-between align-items-center px-3">
-    <h5 class="mb-0">My Group Chat</h5>
-    <button class="btn btn-sm btn-outline-danger" id="logoutBtn">Logout</button>
-  </div>
-
-  <!-- Messages -->
-  <div class="chat-messages" id="chatMessages">
-    
-    <!-- Example received -->
-    <div class="message received">
-      <div class="text">Hello </div>
-      <div class="time">10:00 AM</div>
+    <!-- SIDEBAR -->
+    <div class="col-3 border-end d-flex flex-column p-0 bg-white">
+      <div class="p-3 border-bottom fw-bold">Users</div>
+      <div id="userList" class="flex-grow-1 overflow-auto"></div>
     </div>
 
-    <!-- Example sent -->
-    <div class="message sent">
-      <div class="text">Hi! How are you?</div>
-      <div class="time">10:01 AM</div>
+    <!-- CHAT AREA -->
+    <div class="col-9 d-flex flex-column p-0">
+
+      <!-- HEADER -->
+      <div class="d-flex justify-content-between align-items-center p-3 bg-success text-white">
+        <h5 class="mb-0">My Chat</h5>
+        <button class="btn btn-sm btn-light" id="logoutBtn">Logout</button>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="p-2 border-bottom d-flex gap-2">
+        <input id="searchEmail" type="email" class="form-control" placeholder="Enter email...">
+        <button class="btn btn-primary" onclick="searchAndJoinRoom()">Join</button>
+        <button id="exitRoomBtn">Exit Room</button>
+
+      </div>
+
+      <!-- MESSAGES (THIS MUST SCROLL) -->
+      <div id="chatMessages" class="flex-grow-1 overflow-auto p-3 bg-body-tertiary"></div>
+
+      <!-- INPUT (FIXED AT BOTTOM) -->
+      <form id="chatForm" class="p-2 border-top d-flex gap-2 bg-white">
+        <input id="messageInput" class="form-control" placeholder="Type message..." required>
+        <button class="btn btn-primary">Send</button>
+      </form>
+
     </div>
-
   </div>
-
-  <!-- Input -->
-  <div class="chat-input p-2">
-    <form id="chatForm" class="d-flex gap-2">
-      <input 
-        type="text" 
-        id="messageInput" 
-        class="form-control" 
-        placeholder="Type a message..." 
-        required
-      >
-      <button class="btn btn-primary">Send</button>
-    </form>
-  </div>
-
 </div>
+
 
 
 <!-- Axios library -->
@@ -55,11 +54,15 @@
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
+<script src="/socket.io/socket.io.js"></script>
+
 <!-- Axios base config (defines global `api`) -->
 <script src="/js/axiosConfig.js"></script>
 
 <!-- Chat logic -->
 <script src="/js/chat.js"></script>
+
+
 
 </body>
 </html>

@@ -12,6 +12,10 @@ const http = require("http");
 
 const app = express();
 
+const privateChatRoutes = require("./routes/privateChatRoutes");
+app.use("/api/private-chat", privateChatRoutes);
+
+
 /* ===== Middleware ===== */
 app.use(cors());
 app.use(express.json());

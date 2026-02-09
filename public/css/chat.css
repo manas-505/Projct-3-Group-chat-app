@@ -1,66 +1,32 @@
-body {
-  background: #ece5dd;
+html, body {
+  height: 100%;
+  margin: 0;
 }
 
-.chat-container {
-  max-width: 600px;
-  height: 90vh;
-  margin: 20px auto;
-  display: flex;
-  flex-direction: column;
-  border-radius: 10px;
-  overflow: hidden;
-  background: white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-}
-
-/* Header */
-.chat-header {
-  background: #075e54;
-  color: white;
-  padding: 10px;
-}
-
-/* Messages area */
-.chat-messages {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-  background: #e5ddd5;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Message bubbles */
+/* message bubbles */
 .message {
-  max-width: 70%;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 14px;
+  max-width: 60%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
   position: relative;
+  font-size: 14px;
 }
 
-.message .time {
-  font-size: 10px;
-  text-align: right;
-  margin-top: 4px;
-  opacity: 0.7;
-}
-
-/* Sent vs received */
 .sent {
-  align-self: flex-end;
-  background: #dcf8c6;
+  background: #d1e7dd;
+  margin-left: auto;
 }
 
 .received {
-  align-self: flex-start;
-  background: white;
+  background: #ffffff;
+  border: 1px solid #ddd;
 }
 
-/* Input */
-.chat-input {
-  border-top: 1px solid #ddd;
-  background: #f0f0f0;
+/* timestamp */
+.message .time {
+  font-size: 10px;
+  opacity: 0.6;
+  text-align: right;
+  margin-top: 4px;
 }

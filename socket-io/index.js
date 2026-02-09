@@ -1,22 +1,29 @@
 const { Server } = require("socket.io");
-const socketAuth = require("./middleware");
+const authMiddleware = require("./middleware");
 const chatHandler = require("./handlers/chatHandler");
+const personalChatHandler = require("./handlers/personalChatHandler");
 
-function initSocket(server, app) {
+module.exports = function initSocket(server, app) {
   const io = new Server(server, {
     cors: { origin: "*" },
   });
 
-  /* 🔐 attach auth middleware */
-  io.use(socketAuth);
-
-  /* 🔌 connection handler */
-  io.on("connection", (socket) => {
-    chatHandler(io, socket);
-  });
-
-  /* make io accessible in controllers */
   app.set("io", io);
-}
 
-module.exports = initSocket;
+  /* 🔐 auth */
+  io.use(authMiddleware);
+
+  io.on("connection", (socket) => {
+    console.log("✅ User connected:", socket.user.id);
+
+    /* existing group chat */
+    chatHandler(io, socket);
+
+    /* ⭐ NEW personal chat */
+    personalChatHandler(io, socket);
+
+    socket.on("disconnect", () => {
+      console.log("❌ User disconnected:", socket.user.id);
+    });
+  });
+};

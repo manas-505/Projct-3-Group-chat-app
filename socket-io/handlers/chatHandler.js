@@ -1,19 +1,11 @@
-const User = require("../../models/User");
+module.exports = function chatHandler(io, socket) {
 
-module.exports = async function chatHandler(io, socket) {
-  console.log("✅ Authenticated user connected:", socket.user.id);
+  socket.on("group_message", (text) => {
+    const message = {
+      text,
+      senderEmail: socket.user.email,
+    };
 
-  try {
-    const user = await User.findByPk(socket.user.id, {
-      attributes: ["id", "name", "email"],
-    });
-
-    socket.emit("userConnected", user);
-  } catch (err) {
-    console.error("User fetch error:", err);
-  }
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.user.id);
+    io.emit("new_group_message", message);
   });
 };

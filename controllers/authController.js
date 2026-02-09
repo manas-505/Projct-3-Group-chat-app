@@ -77,3 +77,25 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+exports.getUserByEmail = async (req, res) => {
+  const { email } = req.query;
+
+  const user = await User.findOne({
+    where: { email },
+    attributes: ["id", "name", "email"],
+  });
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  res.json(user);
+};
+
+exports.getAllUsers = async (req, res) => {
+  const users = await User.findAll({
+    attributes: ["id", "name", "email"],
+  });
+
+  res.json(users);
+};
