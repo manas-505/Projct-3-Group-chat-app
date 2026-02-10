@@ -2,68 +2,71 @@
 <html>
 <head>
   <title>Group Chat</title>
+
+  <!-- Bootstrap -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <!-- Your custom CSS -->
   <link rel="stylesheet" href="/css/chat.css">
 </head>
 
 <body class="bg-light">
 
-<div class="container-fluid vh-100">
-  <div class="row h-100">
+<div class="container py-3 vh-100 d-flex flex-column">
 
-    <!-- SIDEBAR -->
-    <div class="col-3 border-end d-flex flex-column p-0 bg-white">
-      <div class="p-3 border-bottom fw-bold">Users</div>
-      <div id="userList" class="flex-grow-1 overflow-auto"></div>
-    </div>
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center p-3 bg-success text-white rounded-top shadow-sm">
 
-    <!-- CHAT AREA -->
-    <div class="col-9 d-flex flex-column p-0">
+    <!-- Chat title + username -->
+    <h5 class="mb-0">
+      My Chat —
+      <span id="currentUsername" class="fw-normal"></span>
+    </h5>
 
-      <!-- HEADER -->
-      <div class="d-flex justify-content-between align-items-center p-3 bg-success text-white chat-header">
-
-        <h5 class="mb-0">My Chat</h5>
-        <button class="btn btn-sm btn-light" id="logoutBtn">Logout</button>
-      </div>
-
-      <!-- SEARCH -->
-      <div class="p-2 border-bottom d-flex gap-2">
-        <input id="searchEmail" type="email" class="form-control" placeholder="Enter email...">
-        <button class="btn btn-primary" onclick="searchAndJoinRoom()">Join</button>
-        <button id="exitRoomBtn">Exit Room</button>
-
-      </div>
-
-      <!-- MESSAGES (THIS MUST SCROLL) -->
-      <div id="chatMessages" class="flex-grow-1 overflow-auto p-3 bg-body-tertiary"></div>
-
-      <!-- INPUT (FIXED AT BOTTOM) -->
-      <form id="chatForm" class="p-2 border-top d-flex gap-2 bg-white">
-        <input id="messageInput" class="form-control" placeholder="Type message..." required>
-        <button class="btn btn-primary">Send</button>
-      </form>
-
-    </div>
+    <button class="btn btn-sm btn-light" id="logoutBtn">Logout</button>
   </div>
+
+
+  <!-- SEARCH / JOIN ROOM -->
+  <div class="p-3 border border-top-0 bg-white d-flex gap-2 shadow-sm">
+    <input id="searchEmail" type="email" class="form-control" placeholder="Enter email to start private chat...">
+    <button class="btn btn-primary" onclick="searchAndJoinRoom()">Join</button>
+    <button class="btn btn-outline-danger" id="exitRoomBtn">Exit</button>
+  </div>
+
+
+  <!-- CHAT BOX -->
+  <div class="flex-grow-1 border border-top-0 bg-body-tertiary overflow-auto p-3 shadow-sm"
+       id="chatMessages">
+  </div>
+
+
+  <!-- AI Suggestions -->
+  <div id="aiSuggestions" class="p-2 border border-top-0 bg-light"></div>
+
+
+  <!-- MESSAGE INPUT -->
+  <form id="chatForm" class="p-3 border border-top-0 bg-white rounded-bottom d-flex gap-2 shadow-sm">
+    <input id="messageInput" class="form-control" placeholder="Type message..." required>
+    <button class="btn btn-primary">Send</button>
+  </form>
+
 </div>
 
 
 
-<!-- Axios library -->
+<!-- Axios -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+<!-- Socket.io -->
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-
 <script src="/socket.io/socket.io.js"></script>
 
-<!-- Axios base config (defines global `api`) -->
+<!-- Axios base config -->
 <script src="/js/axiosConfig.js"></script>
 
 <!-- Chat logic -->
 <script src="/js/chat.js"></script>
-
-
 
 </body>
 </html>

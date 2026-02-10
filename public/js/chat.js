@@ -14,6 +14,14 @@ let currentRoom = null;
   }
 })();
 
+/* ================= SHOW USERNAME ================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const username = localStorage.getItem("username") || "";
+  const el = document.getElementById("currentUsername");
+  if (el) el.textContent = username;
+});
+
+
 /* ================= LOGOUT ================= */
 const logoutBtn = document.getElementById("logoutBtn");
 
@@ -23,6 +31,10 @@ if (logoutBtn) {
     window.location.href = "/login";
   });
 }
+
+
+
+
 
 /* SOCKET CONNECT */
 const socket = io("http://localhost:3000", {
@@ -40,6 +52,9 @@ function formatTime(dateString) {
   const date = new Date(dateString);
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+
+
+
 
 /* ================= SAFE MESSAGE UI ================= */
 function addMessage(msg, type = "sent") {
@@ -170,6 +185,52 @@ socket.on("new_message", (msg) => {
     msg.UserId === getUserIdFromToken() ? "sent" : "received";
 
   addMessage(msg, type);
+});
+
+  /* ================= AI Predictive Typing ================= */
+messageInput.addEventListener("input", async () => {
+  const text = messageInput.value.trim();
+  if (!text) return (aiSuggestions.innerHTML = "");
+
+  const res = await api.post("/ai/predict", { text });
+
+  aiSuggestions.innerHTML = res.data
+    .map(
+      (s) =>
+        `<button class="btn btn-sm btn-outline-secondary me-1 suggestion">${s}</button>`
+    )
+    .join("");
+
+  document.querySelectorAll(".suggestion").forEach((btn) => {
+    btn.onclick = () => {
+      messageInput.value = btn.innerText;
+      aiSuggestions.innerHTML = "";
+    };
+  });
+});
+
+/* ================= Smart Replies on Receive ================= */
+socket.on("new_group_message", async (msg) => {
+  if (currentRoom) return;
+
+  /* get smart replies */
+  const res = await api.post("/ai/smart-replies", {
+    message: msg.text,
+  });
+
+  aiSuggestions.innerHTML = res.data
+    .map(
+      (r) =>
+        `<button class="btn btn-sm btn-success me-1 reply">${r}</button>`
+    )
+    .join("");
+
+  document.querySelectorAll(".reply").forEach((btn) => {
+    btn.onclick = () => {
+      messageInput.value = btn.innerText;
+      aiSuggestions.innerHTML = "";
+    };
+  });
 });
 
 /* ================= EXIT ROOM ================= */

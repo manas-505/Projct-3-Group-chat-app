@@ -28,6 +28,10 @@ app.use(express.static("public"));
 app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 
+
+const aiRoutes = require("./routes/aiRoutes");
+app.use("/api/ai", aiRoutes);
+
 /* ===== Page Routes ===== */
 app.get("/signup", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "signup.html"));

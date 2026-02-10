@@ -15,6 +15,8 @@ form.addEventListener("submit", async (e) => {
     alert("Login successful");
 
     localStorage.setItem("token", res.data.token);
+    localStorage.setItem("username", res.data.user.name);
+
 
     window.location.href = "/dashboard";
   } catch (err) {
