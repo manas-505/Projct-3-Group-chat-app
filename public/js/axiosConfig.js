@@ -8,3 +8,6 @@ api.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+/* ⭐ make api global so chat.js can use it */
+window.api = api;

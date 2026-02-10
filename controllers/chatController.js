@@ -37,13 +37,24 @@ exports.sendMessage = async (req, res) => {
 exports.getMessages = async (req, res) => {
   try {
     const messages = await Message.findAll({
-      include: [{ model: User, attributes: ["id", "name"] }],
+      include: [{ model: User, attributes: ["id", "name", "email"] }],
       order: [["createdAt", "ASC"]],
     });
 
-    res.json(messages);
+    /* format for frontend */
+    const formatted = messages.map((msg) => ({
+      id: msg.id,
+      text: msg.text,
+      createdAt: msg.createdAt,
+      UserId: msg.UserId,
+      senderName: msg.User?.name,
+      senderEmail: msg.User?.email,
+    }));
+
+    res.json(formatted);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
+

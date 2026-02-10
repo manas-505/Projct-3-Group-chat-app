@@ -46,8 +46,15 @@ const server = http.createServer(app);
 
 /* ===== Initialize Socket.IO from separate file ===== */
 initSocket(server, app);
+const startArchiveCron = require("./cron/archiveCron");
+
 
 /* ===== Start Server After DB Sync ===== */
 sequelize.sync().then(() => {
-  server.listen(3000, () => console.log("Server running on port 3000"));
+  startArchiveCron(); // ✅ start nightly archive job
+
+  server.listen(3000, () =>
+    console.log("Server running on port 3000")
+  );
 });
+

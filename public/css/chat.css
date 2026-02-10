@@ -3,14 +3,37 @@ html, body {
   margin: 0;
 }
 
-/* message bubbles */
+/* ===== FIX HEADER ===== */
+.chat-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* ===== SCROLL ONLY MESSAGES ===== */
+#chatMessages {
+  overflow-y: auto;
+  height: calc(100vh - 160px);
+  padding: 10px;
+}
+
+/* ===== FIX INPUT BOTTOM ===== */
+#chatForm {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  z-index: 10;
+}
+
+/* ===== MESSAGE BUBBLES ===== */
 .message {
   max-width: 60%;
   padding: 10px 14px;
   border-radius: 12px;
   margin-bottom: 10px;
-  position: relative;
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
 }
 
 .sent {
@@ -21,6 +44,14 @@ html, body {
 .received {
   background: #ffffff;
   border: 1px solid #ddd;
+}
+
+/* sender name */
+.sender {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 2px;
+  color: #333;
 }
 
 /* timestamp */

@@ -1,158 +1,28 @@
-// const chatMessages = document.getElementById("chatMessages");
-// const chatForm = document.getElementById("chatForm");
-// const messageInput = document.getElementById("messageInput");
-
-// let currentRoom = null;
-
-// /* SOCKET CONNECT */
-// const socket = io("http://localhost:3000", {
-//   auth: { token: localStorage.getItem("token") },
-// });
-
-// /* scroll */
-// function scrollToBottom() {
-//   chatMessages.scrollTop = chatMessages.scrollHeight;
-// }
-
-// /* add message */
-// function addMessage(text, type = "sent") {
-//   const msg = document.createElement("div");
-//   msg.classList.add("message", type);
-
-//   const time = new Date().toLocaleTimeString([], {
-//     hour: "2-digit",
-//     minute: "2-digit",
-//   });
-
-//   msg.innerHTML = `
-//     <div class="text">${text}</div>
-//     <div class="time">${time}</div>
-//   `;
-
-//   chatMessages.appendChild(msg);
-//   scrollToBottom();
-// }
-
-// /* helpers */
-// function getEmailFromToken() {
-//   const token = localStorage.getItem("token");
-//   if (!token) return null;
-//   return JSON.parse(atob(token.split(".")[1])).email;
-// }
-
-// function getUserIdFromToken() {
-//   const token = localStorage.getItem("token");
-//   if (!token) return null;
-//   return JSON.parse(atob(token.split(".")[1])).id;
-// }
-
-// /* ================= JOIN ROOM BY EMAIL ================= */
-// async function searchAndJoinRoom() {
-//   const targetEmail = document.getElementById("searchEmail").value.trim();
-
-//   if (!targetEmail) return alert("Enter email first");
-
-//   try {
-//     const res = await api.get(`/auth/user-by-email?email=${targetEmail}`);
-//     const otherUser = res.data;
-
-//     const myEmail = getEmailFromToken();
-
-//     /* SAME room id for both users */
-//     const roomId = [myEmail, otherUser.email].sort().join("__");
-
-//     /* leave old room */
-//     if (currentRoom) {
-//       socket.emit("leave_room", currentRoom);
-//     }
-
-//     currentRoom = roomId;
-
-//     socket.emit("join_room", roomId);
-
-//     await loadPrivateMessages(roomId);
-
-//     console.log("✅ Joined private room:", roomId);
-//   } catch (err) {
-//     alert("❌ User not found in database");
-//   }
-// }
-
-// /* expose to button */
-// window.searchAndJoinRoom = searchAndJoinRoom;
-
-// /* ================= LOAD PRIVATE HISTORY ================= */
-// async function loadPrivateMessages(roomId) {
-//   try {
-//     const res = await api.get(`/private-chat/messages?roomId=${roomId}`);
-
-//     chatMessages.innerHTML = "";
-
-//     res.data.forEach((msg) => {
-//       const type =
-//         msg.UserId === getUserIdFromToken() ? "sent" : "received";
-
-//       addMessage(msg.text, type);
-//     });
-//   } catch (err) {
-//     console.error("Load private messages error:", err);
-//   }
-// }
-
-// /* ================= SEND MESSAGE ================= */
-// chatForm.addEventListener("submit", (e) => {
-//   e.preventDefault();
-
-//   const text = messageInput.value.trim();
-//   if (!text) return;
-
-//   if (currentRoom) {
-//     socket.emit("new_message", { roomId: currentRoom, text });
-//   } else {
-//     socket.emit("group_message", text);
-//   }
-
-//   messageInput.value = "";
-// });
-
-// /* ================= RECEIVE GROUP ================= */
-// socket.on("new_group_message", (msg) => {
-//   if (currentRoom) return;
-
-//   const type =
-//     msg.senderEmail === getEmailFromToken() ? "sent" : "received";
-
-//   addMessage(msg.text, type);
-// });
-
-// /* ================= RECEIVE PRIVATE ================= */
-// socket.on("new_message", (msg) => {
-//   if (msg.roomId !== currentRoom) return;
-
-//   const type =
-//     msg.fromUserId === getUserIdFromToken() ? "sent" : "received";
-
-//   addMessage(msg.text, type);
-// });
-
-// /* ================= EXIT ROOM ================= */
-// document.getElementById("exitRoomBtn").addEventListener("click", () => {
-//   if (!currentRoom) return;
-
-//   socket.emit("leave_room", currentRoom);
-//   currentRoom = null;
-//   chatMessages.innerHTML = "";
-// });
-
-
-
-
-
 const chatMessages = document.getElementById("chatMessages");
 const chatForm = document.getElementById("chatForm");
 const messageInput = document.getElementById("messageInput");
 
 let currentRoom = null;
+
+/* ================= AUTH CHECK ================= */
+(function checkAuth() {
+  const token = localStorage.getItem("token");
+
+  /* if token missing → go to signup */
+  if (!token) {
+    window.location.href = "/signup";
+  }
+})();
+
+/* ================= LOGOUT ================= */
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  });
+}
 
 /* SOCKET CONNECT */
 const socket = io("http://localhost:3000", {
@@ -164,22 +34,33 @@ function scrollToBottom() {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-/* add message */
-function addMessage(text, type = "sent") {
-  const msg = document.createElement("div");
-  msg.classList.add("message", type);
+/* format DB/socket time */
+function formatTime(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
 
-  const time = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+/* ================= SAFE MESSAGE UI ================= */
+function addMessage(msg, type = "sent") {
+  const sender =
+    msg.senderName ||        // socket live
+    msg.User?.name ||        // DB history
+    msg.senderEmail ||       // fallback
+    "Unknown";
 
-  msg.innerHTML = `
-    <div class="text">${text}</div>
+  const time = formatTime(msg.createdAt);
+
+  const div = document.createElement("div");
+  div.classList.add("message", type);
+
+  div.innerHTML = `
+    <div class="sender">${sender}</div>
+    <div class="text">${msg.text}</div>
     <div class="time">${time}</div>
   `;
 
-  chatMessages.appendChild(msg);
+  chatMessages.appendChild(div);
   scrollToBottom();
 }
 
@@ -232,7 +113,8 @@ async function loadPrivateMessages(roomId) {
   res.data.forEach((msg) => {
     const type =
       msg.UserId === getUserIdFromToken() ? "sent" : "received";
-    addMessage(msg.text, type);
+
+    addMessage(msg, type);
   });
 }
 
@@ -246,7 +128,8 @@ async function loadGroupMessages() {
     res.data.forEach((msg) => {
       const type =
         msg.UserId === getUserIdFromToken() ? "sent" : "received";
-      addMessage(msg.text, type);
+
+      addMessage(msg, type);
     });
   } catch (err) {
     console.error("Load group messages error:", err);
@@ -274,9 +157,9 @@ socket.on("new_group_message", (msg) => {
   if (currentRoom) return;
 
   const type =
-    msg.senderEmail === getEmailFromToken() ? "sent" : "received";
+    msg.UserId === getUserIdFromToken() ? "sent" : "received";
 
-  addMessage(msg.text, type);
+  addMessage(msg, type);
 });
 
 /* ================= RECEIVE PRIVATE ================= */
@@ -284,9 +167,9 @@ socket.on("new_message", (msg) => {
   if (msg.roomId !== currentRoom) return;
 
   const type =
-    msg.fromUserId === getUserIdFromToken() ? "sent" : "received";
+    msg.UserId === getUserIdFromToken() ? "sent" : "received";
 
-  addMessage(msg.text, type);
+  addMessage(msg, type);
 });
 
 /* ================= EXIT ROOM ================= */
@@ -296,7 +179,6 @@ document.getElementById("exitRoomBtn").addEventListener("click", async () => {
   socket.emit("leave_room", currentRoom);
   currentRoom = null;
 
-  /* 🔥 reload group chat history */
   await loadGroupMessages();
 });
 

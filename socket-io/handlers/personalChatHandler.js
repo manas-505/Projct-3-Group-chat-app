@@ -1,6 +1,8 @@
 const PrivateMessage = require("../../models/PrivateMessage");
+const User = require("../../models/User");
 
 module.exports = function personalChatHandler(io, socket) {
+
   /* ================= JOIN ROOM ================= */
   socket.on("join_room", (roomId) => {
     if (!roomId) return;
@@ -29,16 +31,25 @@ module.exports = function personalChatHandler(io, socket) {
         UserId: socket.user.id,
       });
 
-      /* 📡 Emit ONLY to that room */
-      io.to(roomId).emit("new_message", {
-        id: saved.id,
-        roomId,
-        text,
-        senderEmail: socket.user.email,
-        createdAt: saved.createdAt,
+      /* 🔎 fetch with sender info */
+      const fullMsg = await PrivateMessage.findByPk(saved.id, {
+        include: [{ model: User, attributes: ["id", "name", "email"] }],
       });
+
+      /* 📡 emit SAME structure as DB history */
+      io.to(roomId).emit("new_message", {
+        id: fullMsg.id,
+        roomId,
+        text: fullMsg.text,
+        createdAt: fullMsg.createdAt,
+        UserId: fullMsg.UserId,
+        senderName: fullMsg.User.name,
+        senderEmail: fullMsg.User.email,
+      });
+
     } catch (err) {
       console.error("Private message error:", err);
     }
   });
+
 };
